@@ -1,0 +1,176 @@
+FORMAT: 1A
+HOST: http://s2e24dcb1.fastvps-server.com/api/takejet/v1
+
+# TakeJet
+
+# Data Structures
+
+## RussianInvoice (object) 
+
++ inn (string) - ИНН. Строка вида "7893 2904 3947 2394"
++ kpp (string) - КПП. Страка вида "234 345 234 443"
++ bik (string) - БИК или название банка. Строка "578 36782 44 820 4432" или название
++ accountNumber (string) - Номер счета. Формат "2345654" (длина не известна)
++ orgName (string) - Название организации. Например: 'ООО "Карета"'
++ image (optional, string) - Ссылка на фото счета
+
+## InternationalInvoice (object)
+
++ payerName (string) - Имя плательщика. Например, "Александр Борисович Власов"
++ address (string) - Адресс организации. Например, "Санкт-Петербург, ул. Морская, 67"
++ IBAN (string) - Счет IBAN. Например, "678 36782 44 820 4432"
++ SWIFT (string) - Номер S.W.I.F.T. Например, "2345 6488 7898"
++ image (optional, string) - Ссылка на фото счета
+
+## Invoice (object)
+
++ id (number) - Идентификатор
++ name (string) - Имя
++ russian (optional, RussianInvoice) - Данные российского инвойса
++ international (optional, InternationalInvoice) - Данные иностранного инвойса
+
+## -Счет [/order/invoice/]
+
+Добавлять можно два типа инвойсов: российский или иностранный. 
+Название инвойса обязательно. 
+Также пользователь может отправить лишь изображение инвойса,
+а не заполнять данные в ручну. Обратное тоже верно.
+
+### +Создать cчет [POST /order/invoice/add]
+
++ Request (application/json)
+
+    + Attributes (object)
+        + token (string) - Authorization token
+        + invoice (Invoice) - Invoice
+        
+    + Body
+
+            {
+                "token": "aaaaa6900f58c9b8b737c291790f14fa678ccccc",
+                "invoice": {
+                    "name": "First invoice",
+                    "russian": {
+                        "inn": "7893 2904 3947 2394",
+                        "kpp": "234 345 234 443",
+                        "bik": "578 36782 44 820 4432",
+                        "accountNumber": "2345654",
+                        "image": null
+                    },
+                    "international": null,
+                }
+            }
+
++ Response 200 (application/json)
+
+    + Attributes (object)
+        + id (number) - Identifier of invoce
+         
+    + Body
+    
+            {
+                "id": 1
+            }
+
+### +Получить список счетов [POST /order/invoice/list]
+
++ Request 200 (application/json)
+    + Attributes (object)
+        + token (string) - Authorization token
+
+    + Body
+    
+            {
+                "token": "aaaaa6900f58c9b8b737c291790f14fa678ccccc"
+            }
+
++ Response 200 (application/json)
+
+    + Attributes (object)
+        + invoices (array[Invoice]) - Array of search requests
+        
+    + Body
+    
+            {
+                "invoices": [
+                    {
+                        "id": 1,
+                        "name" : "First invoice",
+                        "russian": {
+                            "inn": "7893 2904 3947 2394",
+                            "kpp": "234 345 234 443",
+                            "bik": "578 36782 44 820 4432",
+                            "accountNumber" : "2345654"
+                            "image": null
+                        },
+                        "international": null,
+                    },
+                    {
+                        "id": 2,
+                        "name" : "Second invoice",
+                        "russian": null,
+                        "international": {
+                            "payerName": "Александр Борисович Власов",
+                            "address": "Санкт-Петербург, ул. Морская, 67",
+                            "IBAN": "678 36782 44 820 4432",
+                            "SWIFT": "2345 6488 7898",
+                            "image": null
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "name" : "Third invoice",
+                        "russian": null,
+                        "international": {
+                            "payerName": null,
+                            "address": null,
+                            "IBAN": null,
+                            "SWIFT": null,
+                            "image": "images/invoices/3"
+                        }
+                    }
+                ]
+            }
+
+### +Удалить счет [POST /order/invoice/delete]
++ Request (application/json)
+
+    + Attributes (object)
+        + token (string) - Authorization token
+        + id (number) - Invoice identifier
+        
+    + Body
+    
+            {
+                "token": "aaaaa6900f58c9b8b737c291790f14fa678ccccc",
+                "id": 1
+            }
+    
++ Response 200 (application/json)
+
+### +Редактировать счет [POST /order/invoice/update]
++ Request (application/json)
+
+    + Attributes (object)
+        + token (string) - Authorization token
+        + id (number) - Invoice identifier
+        
+    + Body
+    
+            {
+                "token": "aaaaa6900f58c9b8b737c291790f14fa678ccccc",
+                "id": 1
+                "invoice": {
+                    "name" : "Second invoice",
+                    "russian": null,
+                    "international": {
+                        "payerName": "Александр Борисович Власов",
+                        "address": "Санкт-Петербург, ул. Морская, 67",
+                        "IBAN": "678 36782 44 820 4432",
+                        "SWIFT": "2345 6488 7898",
+                        "image": null
+                    }
+                }
+            }
+    
++ Response 200 (application/json)
